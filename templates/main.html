@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load static %}
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
@@ -10,7 +11,7 @@
         <title>StudyBud</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        {% comment %} <link rel="stylesheet" href=""> {% endcomment %}
+         <link rel="stylesheet" href="{% static "styles/main.css" %}"> 
     </head>
     <body>
         <!--[if lt IE 7]>

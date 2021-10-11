@@ -32,7 +32,7 @@
                 {% endif %}
                     
                 
-                <small>@{{message.user}} {{ message.created|timesince}} ago</small>
+                <small> <a href="{% url 'user_profile' pk=message.user.id %}">@{{message.user}}</a> {{ message.created|timesince}} ago</small>
                 <br>
 
                 <p>{{message.body}}</p>
@@ -65,7 +65,7 @@
 
         {% for user in participants %}
         <div>
-            <p>@{{user.username}}</p> 
+            <a href="{% url 'user_profile' pk=user.id %}">@{{user.username}}</a> 
         </div>
           
         {% endfor %}
