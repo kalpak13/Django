@@ -5,13 +5,12 @@
 
 <form method='POST'>
 
-{% csrf_token %}
-<p>are you sure you want to delete "{{obj1}}"?</p>
-<a href="{{request.META.HTTP_REFERER}}">go back</a>
-<input type="submit" value='confirm'>
+    {% csrf_token %}
+    <p>are you sure you want to delete "{{obj1}}"?</p>
+    <a href="{{request.META.HTTP_REFERER}}">go back</a>
+    <input type="submit" value='confirm'>
 
 </form>
 
-    
+
 {% endblock Content %}
-    
