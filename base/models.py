@@ -15,7 +15,12 @@ class Room(models.Model):
     topic = models.ForeignKey(Topic, null=True, on_delete=models.SET_NULL)
     name = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
-    # participants
+    participants=models.ManyToManyField(User,related_name='participants',blank=True)
+    #user of related name can be seen here...remove the related name and we'll get an error
+    #  because in Message model we have used User as foreign key which will be referenced as user which is a 
+    # default related name assigned by django
+
+
     # take snap whenver we save the particular instance
     updated = models.DateTimeField(auto_now=True)
     # only take a snap when it is first created

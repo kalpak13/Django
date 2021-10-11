@@ -3,6 +3,7 @@ from django.db.models import Q
 from django.http import HttpResponse
 from . import models, forms
 from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.contrib.auth  import authenticate, login,logout
 from django.contrib.auth.decorators import login_required
@@ -25,7 +26,7 @@ def login_page(request):
 
 
     if request.method=='POST':
-        username=request.POST.get('username')
+        username=request.POST.get('username').lower()
         password=request.POST.get('password')
         try:
             user=User.objects.get(username=username)
@@ -37,12 +38,29 @@ def login_page(request):
                 messages.error(request, 'invalid Credentials')
         except:
             messages.error(request, 'user does not exist')
-    context = {'login':page}
+    context = {'page':page}
     return render(request, 'base/login_register.html', context)
 
 def logout_user(request):
     logout(request)
     return redirect('home')
+
+def register_user(request):
+    page='register'
+    form=UserCreationForm()
+    if request.method=='POST':
+        form=UserCreationForm(request.POST)
+        if form.is_valid():
+            user=form.save(commit=False)
+            user.username=user.username.lower()
+            user.save()
+            login(request,user)
+            return redirect('home')
+        else:
+            messages.error(request,'registration failed...try sometime later')
+            
+    context={'page':page,'form':form}
+    return render(request,'base/login_register.html',context)
 
 def Home(request):
     q = request.GET.get('q')
@@ -65,7 +83,18 @@ def Home(request):
 
 def Room(request, pk):
     room = models.Room.objects.get(id=pk)
-    return render(request, 'base/room.html', {'room': room})
+    # messages=models.Message.objects.filter(room=room)
+    messages=room.message_set.all().order_by('-created')
+    #to query the child models we specify the name of the child models_set.all() to get the all of the child models
+    if request.method=='POST':
+        messgage=models.Message.objects.create(user=request.user,
+                                               room=room,
+                                               body=request.POST.get('body')
+                                               )
+        return redirect('room',pk=room.id)#because it is post request therfore we need to get back to the page with a get request
+                            
+    
+    return render(request, 'base/room.html', {'room': room,'room_messages':messages})
 
 @login_required(login_url='login')
 def create_room(request):

@@ -1,4 +1,4 @@
-<a href='#'> <h1> Logo </h1>
+<a href='{% url "home" %}'> <h1> Logo </h1>
 </a>
 
 <form method="GET" action="{% url 'home' %}">
@@ -11,9 +11,12 @@
 
 
 {% if request.user.is_authenticated %}
+<p>Welcome {{request.user}}</p>
 <a href="{% url 'logout' %}">Logout  </a>
 {% else %}
 <a href="{% url 'login' %}">Login   </a>
+
+
 {% endif %}
     
 
