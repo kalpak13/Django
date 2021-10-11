@@ -1,0 +1,20 @@
+<h3>Recent activity</h3>
+        {% for msg in room_messages  %}
+        <div>
+            <small>{{msg.user}}  {{msg.created|timesince}} ago</small>
+            <small>replied to {{msg.room}}</small>
+            <br>
+           <p> {{msg}}</p>
+           
+          
+               
+           
+
+           <!-- <p> {{msg.body}}</p> -->
+           <!-- msg,body will give whole body but msg will give only upto 50 char because in __str__ function we have set a limit  -->
+           {% if request.user == msg.user %}
+           <a href="{% url 'delete-comment' pk=msg.id %}">delete</a>
+           {% endif %}
+        </div>
+          
+        {% endfor %}

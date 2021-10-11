@@ -25,6 +25,13 @@
             {% for message in room_messages %}
             <div>
                 <!-- <h4>@{{message.user}} <span> {{ message.created.now.day|sub:message.created.day }} days ago</span></h4>  -->
+                
+                {% if request.user == message.user %}
+                <a href="{% url 'delete-comment' pk=message.id %}">Delete</a>
+                    
+                {% endif %}
+                    
+                
                 <small>@{{message.user}} {{ message.created|timesince}} ago</small>
                 <br>
 
@@ -55,6 +62,13 @@
 
     <div>
         <h3>participants</h3>
+
+        {% for user in participants %}
+        <div>
+            <p>@{{user.username}}</p> 
+        </div>
+          
+        {% endfor %}
         <hr>
     </div>
 </div>

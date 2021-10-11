@@ -63,22 +63,33 @@ def register_user(request):
     return render(request,'base/login_register.html',context)
 
 def Home(request):
-    q = request.GET.get('q')
-    # q=request.GET.get('q') if request.GET.get('q')!=None else ''
-    rooms = None
-    if q == None:
-        rooms = models.Room.objects.all()
-    else:
-        # rooms = models.Room.objects.filter(topic__name=q)
-        # rooms = models.Room.objects.filter(topic__name__icontains=q)
-        rooms = models.Room.objects.filter(Q(topic__name__icontains=q) |
-                                           Q(name__icontains=q) |
-                                           Q(description__icontains=q)
-                                           )
+    # q = request.GET.get('q')
+    q=request.GET.get('q') if request.GET.get('q')!=None else ''
+    #q is topic name therfore we need to match it with topic name only
+    # rooms = None
+  
+    # if q == None:
+    #     rooms = models.Room.objects.all()
+        
+        
+    # else:
+    #     # rooms = models.Room.objects.filter(topic__name=q)
+    #     # rooms = models.Room.objects.filter(topic__name__icontains=q)
+    #     rooms = models.Room.objects.filter(Q(topic__name__icontains=q) |
+    #                                        Q(name__icontains=q) |
+    #                                        Q(description__icontains=q)
+    #                                        )
+                                         
         #containts means the topic name should atleadt contain that string and i  is for to remove case sensi
+    rooms = models.Room.objects.filter(Q(topic__name__icontains=q) |
+                                       Q(name__icontains=q) |
+                                       Q(description__icontains=q)
+                                      )
     room_count = rooms.count()
     topics = models.Topic.objects.all()
-    return render(request, 'base/home.html', {'rooms': rooms, 'topics': topics, 'room_count': room_count})
+    # room_messages=models.Message.objects.all()
+    room_messages=models.Message.objects.filter(Q(room__topic__name__icontains=q))
+    return render(request, 'base/home.html', {'rooms': rooms, 'topics': topics, 'room_count': room_count,'room_messages':room_messages})
 
 
 def Room(request, pk):
@@ -86,15 +97,17 @@ def Room(request, pk):
     # messages=models.Message.objects.filter(room=room)
     messages=room.message_set.all().order_by('-created')
     #to query the child models we specify the name of the child models_set.all() to get the all of the child models
+    participants=room.participants.all()
     if request.method=='POST':
         messgage=models.Message.objects.create(user=request.user,
                                                room=room,
                                                body=request.POST.get('body')
                                                )
+        room.participants.add(request.user)
         return redirect('room',pk=room.id)#because it is post request therfore we need to get back to the page with a get request
                             
     
-    return render(request, 'base/room.html', {'room': room,'room_messages':messages})
+    return render(request, 'base/room.html', {'room': room,'room_messages':messages,'participants':participants})
 
 @login_required(login_url='login')
 def create_room(request):
@@ -102,7 +115,9 @@ def create_room(request):
     if request.method == 'POST':
         form = forms.RoomForm(request.POST)
         if form.is_valid():
-            form.save()
+            room=form.save()
+            
+           
             return redirect('home')
     context = {'form': form}
     return render(request, 'base/room_form.html', context)
@@ -134,3 +149,15 @@ def delete_room(request, pk):
         room.delete()
         return redirect('home')
     return render(request, 'base/delete.html', {'obj1': room})
+
+
+@login_required(login_url='login')
+def delete_comment(request, pk):
+    message = models.Message.objects.get(id=pk)
+    if request.user !=message.user:
+        return HttpResponse("you are not allowed here!!")
+
+    if request.method == 'POST':
+        message.delete()
+        return redirect('home')
+    return render(request, 'base/delete.html', {'obj1': message})
