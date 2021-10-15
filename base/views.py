@@ -88,7 +88,7 @@ def Home(request):
     room_count = rooms.count()
     topics = models.Topic.objects.all()
     # room_messages=models.Message.objects.all()
-    room_messages=models.Message.objects.filter(Q(room__topic__name__icontains=q))
+    room_messages=models.Message.objects.filter(Q(room__topic__name__icontains=q))[0:5]
     return render(request, 'base/home.html', {'rooms': rooms, 'topics': topics, 'room_count': room_count,'room_messages':room_messages})
 
 
@@ -121,22 +121,28 @@ def user_profile(request,pk):
 @login_required(login_url='login')
 def create_room(request):
     form = forms.RoomForm()
+    topics=models.Topic.objects.all()
     if request.method == 'POST':
-        form = forms.RoomForm(request.POST)
-        if form.is_valid():
-            room=form.save(commit=False)
-            room.host=request.user
-            # room.participants.add(request.user)
-            room.save()     
+        topic_name=request.POST.get('topic')
+        topic,created=models.Topic.objects.get_or_create(name=topic_name)
+        #if we pass a new topic name then created will be true else false showing that the topic already exists or not 
+        models.Room.objects.create(
+            host=request.user,
+            topic=topic,
+            name=request.POST.get('name'),
+            description=request.POST.get('description'),
+        )
+          
             
            
-            return redirect('home')
-    context = {'form': form}
+        return redirect('home')
+    context = {'form': form,'topics':topics}
     return render(request, 'base/room_form.html', context)
 
 @login_required(login_url='login')
 def update_room(request, pk):
     room = models.Room.objects.get(id=pk)
+    topics=models.Topic.objects.all()
     form = forms.RoomForm(instance=room)
     if request.user !=room.host:
         return HttpResponse("you are not allowed here!!")
@@ -144,11 +150,15 @@ def update_room(request, pk):
 
 
     if request.method == 'POST':
-        form = forms.RoomForm(request.POST, instance=room)
-        if form.is_valid():
-            form.save()
-            return redirect('home')
-    context = {'form': form}
+        topic_name=request.POST.get('topic')
+        topic,created=models.Topic.objects.get_or_create(name=topic_name)
+        room.name=request.POST.get('name')
+        room.topic=topic
+        room.description=request.POST.get('decription')
+        room.save()
+        
+        return redirect('home')
+    context = {'form': form,'topics':topics,'room':room}
     return render(request, 'base/room_form.html', context)
 
 @login_required(login_url='login')

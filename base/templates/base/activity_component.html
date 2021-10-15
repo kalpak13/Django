@@ -1,20 +1,63 @@
-<h3>Recent activity</h3>
-        {% for msg in room_messages  %}
-        <div>
-            <small><a href="{% url 'user_profile' pk=msg.user.pk %}">@{{msg.user}} </a> {{msg.created|timesince}} ago</small>
-            <small>replied to {{msg.room}}</small>
-            <br>
-           <p> {{msg}}</p>
-           
-          
-               
-           
-
-           <!-- <p> {{msg.body}}</p> -->
-           <!-- msg,body will give whole body but msg will give only upto 50 char because in __str__ function we have set a limit  -->
-           {% if request.user == msg.user %}
-           <a href="{% url 'delete-comment' pk=msg.id %}">delete</a>
-           {% endif %}
+<div class="activities">
+    <div class="activities__header">
+      <h2>Recent Activities</h2>
+    </div>
+    {% for msg in room_messages  %}
+    <div class="activities__box">
+      <div class="activities__boxHeader roomListRoom__header">
+        <a href="{% url 'user_profile' pk=msg.user.pk %}" class="roomListRoom__author">
+          <div class="avatar avatar--small">
+            <img src="https://randomuser.me/api/portraits/women/11.jpg" />
+          </div>
+          <p>
+            @{{msg.user}}
+            <span>{{msg.created|timesince}}</span>
+          </p>
+        </a>
+        {% if request.user == msg.user %}
+        <div class="roomListRoom__actions">
+          <a href="{% url 'delete-comment' pk=msg.id %}">
+            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+              <title>remove</title>
+              <path
+                d="M27.314 6.019l-1.333-1.333-9.98 9.981-9.981-9.981-1.333 1.333 9.981 9.981-9.981 9.98 1.333 1.333 9.981-9.98 9.98 9.98 1.333-1.333-9.98-9.98 9.98-9.981z"
+              ></path>
+            </svg>
+          </a>
         </div>
-          
-        {% endfor %}
+        {% endif %}
+      </div>
+      
+      
+
+      <div class="activities__boxContent">
+        <p>replied to post “<a href="{% url 'room' pk=msg.room.id %}">{{msg.room}}</a>”</p>
+        <div class="activities__boxRoomContent">
+          {{msg}}
+        </div>
+      </div>
+      
+    </div>
+    {% endfor %}
+    
+
+    
+  </div>
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+       
+       
