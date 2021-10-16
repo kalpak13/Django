@@ -86,7 +86,7 @@ def Home(request):
                                        Q(description__icontains=q)
                                       )
     room_count = rooms.count()
-    topics = models.Topic.objects.all()
+    topics = models.Topic.objects.all()[0:3]
     # room_messages=models.Message.objects.all()
     room_messages=models.Message.objects.filter(Q(room__topic__name__icontains=q))[0:5]
     return render(request, 'base/home.html', {'rooms': rooms, 'topics': topics, 'room_count': room_count,'room_messages':room_messages})
@@ -183,3 +183,30 @@ def delete_comment(request, pk):
         message.delete()
         return redirect('home')
     return render(request, 'base/delete.html', {'obj1': message})
+
+
+@login_required(login_url='login')
+def update_user(request,pk):
+    user=request.user
+    form=forms.UserForm(instance=user)
+    if request.method=='POST':
+        form=forms.UserForm(request.POST,instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect('user_profile',pk=user.id)
+    context={'form':form}
+    return render(request,'base/update_user.html',context)
+
+
+## for mobile version
+
+def topics_page(request):
+    q=request.GET.get('q') if request.GET.get('q')!=None else ''
+    topics=models.Topic.objects.filter(name__icontains=q)
+    context={'topics':topics}
+    return render(request,'base/topics.html',context)
+
+def activity_page(request):
+    room_messages=models.Message.objects.all()
+    context={'msgs':room_messages}
+    return render(request,'base/activity.html',context)
